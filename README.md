@@ -15,6 +15,6 @@ This is my custom Map for Minekhan, YOU WILL NEED THE CUSTOM HTML FOR THIS TO WO
 ![Screenshot 2021-04-21 11 40 09 AM](https://user-images.githubusercontent.com/69991448/115581851-63515200-a296-11eb-8bd2-0eff381c5fe5.png)
 
 
-# Dont go here, it looks Ugly and its undone
+# Dont go here, it looks Ugly and its Not Done
 
 ![Screenshot 2021-04-21 11 39 47 AM](https://user-images.githubusercontent.com/69991448/115581982-824fe400-a296-11eb-9dac-390714d14e98.png)
