@@ -4649,7 +4649,9 @@ function MineKhan() {
 		+ "FPS: " + analytics.fps
 
 		if (p.autoBreak) {
-			text("Super breaker enabled", 5, height - 89, 12)
+			text("Super breaker enabled", 5, height - 89, 12);
+			
+		Text("Health: "+Math.floor(p.health), 5, height - 103, 12);
 		}
 
 		ctx.textAlign = 'right'
@@ -5445,7 +5447,15 @@ function MineKhan() {
 			controls()
 			runGravity()
 			resolveContactsAndUpdatePosition()
-
+			
+			if(p.health < 20) {
+			    p.health+=0.04;
+			}
+			
+			if(p.health > 20) {
+			    p.health = 20;
+			}
+			
 			if (updateHUD) {
 				clear()
 				gl.clearColor(0, 0, 0, 0)
