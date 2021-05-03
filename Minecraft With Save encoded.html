@@ -2625,12 +2625,15 @@ function MineKhan() {
 				p.velocity.y = 0;
 			}
 		} else {
-			p.velocity.y += p.gravityStength * dt
+			p.velocity.y += p.gravityStength * dt;
 			if(p.velocity.y < -p.maxYVelocity) {
-				p.velocity.y = -p.maxYVelocity
+				p.velocity.y = -p.maxYVelocity;
 			}
 		}
-	}
+		if(p.health <= -100) {
+		    screen = ''
+		}
+	};
 
 	function box2(sides, tex) {
 		if (blockFill) {
