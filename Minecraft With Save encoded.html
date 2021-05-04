@@ -3,7 +3,7 @@
 <html>
 	<head>
 		<meta charset="utf-8">
-		<title>Added Health and Soon, some form of survival </title>
+		<title>Adding Health and Soon, some form of survival </title>
 		<link id="vtfont" href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
 	</head>
 	<style>
@@ -1029,12 +1029,14 @@ function MineKhan() {
 
 	if (height === 400) alert("Canvas is too small. Click the \"Settings\" button to the left of the \"Vote Up\" button under the editor and change the height to 600.")
 
-	let generator = {
-		height: 80, // Height of the hills
-		smooth: 0.01, // Smoothness of the terrain
-		extra: 30, // Extra height added to the world.
-		caveSize: 0.00 // Redefined right above where it's used
-	}
+    let generator = {
+        height: 200, // Height of the hills
+        smooth: 0.01, // Smoothness of the terrain
+        extra: 30, // Extra height added to the world.
+        caveSize: 0.00, // Redefined right above where it's 
+        biomeSmooth: 0.007
+}
+	
 	let maxHeight = 255
 	let blockOutlines = false
 	let blockFill = true
@@ -1058,6 +1060,7 @@ function MineKhan() {
 	let mainbg, dirtbg // Background images
 	let bigArray = win.bigArray || new Float32Array(600000)
 	win.bigArray = bigArray
+
 
 	// Callback functions for all the screens; will define them further down the page
 	let drawScreens = {
@@ -2631,7 +2634,7 @@ function MineKhan() {
 			}
 		}
 		if(p.health <= -100) {
-		    screen = ''
+		    screen = 'dead'
 		}
 	};
 
@@ -3575,36 +3578,67 @@ function MineKhan() {
 			this.loadFrom = []
 			this.lastChunk = ","
 		}
-		genChunk(chunk) {
-			let x = chunk.x >> 4
-			let z = chunk.z >> 4
-			let trueX = chunk.x
-			let trueZ = chunk.z
+genChunk(chunk) {
+		let x = chunk.x >> 4
+		let z = chunk.z >> 4
+		let trueX = chunk.x
+		let trueZ = chunk.z
 
-			if (chunk.generated) {
-				return false
-			}
-			let hide = !loadString
-			let smoothness = generator.smooth
-			let hilliness = generator.height
-			let gen = 0
-			for (let i = 0; i < 16; i++) {
-				for (let k = 0; k < 16; k++) {
-					gen = superflat ? 4 : Math.round(noise((trueX + i) * smoothness, (trueZ + k) * smoothness) * hilliness) + generator.extra
-					chunk.tops[k * 16 + i] = gen
-
-					chunk.setBlock(i, gen, k, blockIds.grass)
-					chunk.setBlock(i, gen - 1, k, blockIds.dirt)
-					chunk.setBlock(i, gen - 2, k, blockIds.dirt)
-					chunk.setBlock(i, gen - 3, k, blockIds.dirt)
-					for (let j = 1; j < gen - 3; j++) {
-						chunk.setBlock(i, j, k, blockIds.stone)
-					}
-					chunk.setBlock(i, 0, k, blockIds.bedrock)
-				}
-			}
-			chunk.generated = true
+		if (chunk.generated) {
+			return false
 		}
+		let hide = !loadString
+		let smoothness = generator.smooth
+		let hilliness = generator.height
+		let biomeSmooth = generator.biomeSmooth;
+		let gen = 0;
+		let biome = 0;
+		for (let i = 0; i < 16; i++) {
+			for (let k = 0; k < 16; k++) {
+				if(gen<120 && !superflat) {
+			    gen = 100;
+			    chunk.setBlock(i, gen, k, blockIds.Water);
+
+			}
+				biome = superflat ? 0 : Math.round(noise((trueX + i) * biomeSmooth, (trueZ + k) * biomeSmooth));
+				gen = superflat ? 4 : Math.round(noise((trueX + i) * smoothness, (trueZ + k) * smoothness) * hilliness) + generator.extra
+				chunk.tops[k * 16 + i] = gen
+
+		    if(biome > 0.25 && !superflat){
+			
+			chunk.tops[k * 16 + i] = gen;
+
+			chunk.setBlock(i, gen, k, blockIds.sand);
+			chunk.setBlock(i, gen - 1, k, blockIds.sand);
+			chunk.setBlock(i, gen - 2, k, blockIds.sand);
+			chunk.setBlock(i, gen - 3, k, blockIds.sand);
+			if(gen>120){
+			    chunk.setBlock(i, gen, k, blockIds.stone);
+			}
+			if(gen>140){
+			    chunk.setBlock(i, gen, k, blockIds.sand);
+			}
+		}
+
+			if(biome < 0.25){
+			chunk.tops[k * 16 + i] = gen;
+
+
+			chunk.setBlock(i, gen, k, blockIds.grass);
+			chunk.setBlock(i, gen - 1, k, blockIds.dirt);
+			chunk.setBlock(i, gen - 2, k, blockIds.dirt);
+			chunk.setBlock(i, gen - 3, k, blockIds.dirt);
+
+		    }
+
+				for (let j = 1; j < gen - 3; j++) {
+					chunk.setBlock(i, j, k, blockIds.stone)
+				}
+				chunk.setBlock(i, 0, k, blockIds.bedrock)
+			}
+		}
+		chunk.generated = true
+	}
 		getAdjacentSubchunks(x, y, z) {
 			let minChunkX = x - 16 >> 4
 			let maxChunkX = x + 16 >> 4
