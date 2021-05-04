@@ -3,7 +3,7 @@
 <html>
 	<head>
 		<meta charset="utf-8">
-		<title>Adding Health and Soon, some form of survival </title>
+		<title>MineKhan Modded! With Biomes and Health </title>
 		<link id="vtfont" href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
 	</head>
 	<style>
@@ -1029,13 +1029,13 @@ function MineKhan() {
 
 	if (height === 400) alert("Canvas is too small. Click the \"Settings\" button to the left of the \"Vote Up\" button under the editor and change the height to 600.")
 
-    let generator = {
-        height: 200, // Height of the hills
-        smooth: 0.01, // Smoothness of the terrain
-        extra: 30, // Extra height added to the world.
-        caveSize: 0.00, // Redefined right above where it's 
-        biomeSmooth: 0.007
-}
+	let generator = {
+		height: 80, // Height of the hills
+		smooth: 0.01, // Smoothness of the terrain
+		extra: 30, // Extra height added to the world.
+		caveSize: 0.00, // Redefined right above where it's used
+		biomeSmooth: 0.007 // smooth of biomes
+};
 	
 	let maxHeight = 255
 	let blockOutlines = false
@@ -3290,16 +3290,27 @@ function MineKhan() {
 				}
 			}
 		}
-		populate() {
+populate() {
 			randomSeed(hash(this.x, this.z) * 210000000)
 			let wx = 0, wz = 0, ground = 0, top = 0, rand = 0, place = false
-
+			let biomeSmooth = generator.biomeSmooth;
+			let biome = 0;
+			let gen = 0;
+			let trueX = this.x;
+			let trueZ = this.z;
+			let smoothness = generator.smooth
+			let hilliness = generator.hilliness
+			var items = [blockIds.jungleLog, blockIds.darkOakLog, blockIds.acaciaLog,blockIds.birchLog]
+			var randomtree = items[Math.floor(Math.random() * items.length)];
 			for (let i = 0; i < 16; i++) {
 				for (let k = 0; k < 16; k++) {
 					wx = this.x + i
 					wz = this.z + k
 					ground = this.tops[k * 16 + i]
-					if (trees && random() < 0.005 && this.getBlock(i, ground, k)) {
+					gen = superflat ? 4 : Math.round(noise((trueX + i) * smoothness, (trueZ + k) * smoothness) * hilliness) + generator.extra
+					biome = superflat ? 0 : Math.round(noise((trueX + i) * biomeSmooth, (trueZ + k) * biomeSmooth));
+if (trees && random() < 0.005 && this.getBlock(i, ground, k) && biome < 0.5) {
+
 
 						top = ground + Math.floor(4.5 + random(2.5))
 						rand = Math.floor(random(4096))
@@ -3311,6 +3322,7 @@ function MineKhan() {
 						}
 						this.setBlock(i, top + 1, k, blockIds.leaves)
 						this.setBlock(i, ground, k, blockIds.dirt)
+
 
 						//Bottom leaves
 						for (let x = -2; x <= 2; x++) {
@@ -3369,6 +3381,18 @@ function MineKhan() {
 						world.spawnBlock(wx, top + 1, wz + 1, blockIds.leaves)
 						world.spawnBlock(wx - 1, top + 1, wz, blockIds.leaves)
 					}
+	if (random() < 0.01 && this.getBlock(i, ground, k) && biome > 0.5 && ground > 60) {
+					top = ground + Math.floor(2.5 + random(1.5));
+					rand = Math.floor(random(4096));
+					let tree = blockIds.greenWool;
+
+					//Center
+					for (let j = ground + 1; j <= top; j++) {
+						this.setBlock(i, j, k, tree);
+					}
+					this.setBlock(i, ground, k, blockIds.sand);
+				} // cactus
+				
 
 					// Blocks of each per chunk in Minecraft
 					// Coal: 185.5
@@ -3603,6 +3627,8 @@ genChunk(chunk) {
 				biome = superflat ? 0 : Math.round(noise((trueX + i) * biomeSmooth, (trueZ + k) * biomeSmooth));
 				gen = superflat ? 4 : Math.round(noise((trueX + i) * smoothness, (trueZ + k) * smoothness) * hilliness) + generator.extra
 				chunk.tops[k * 16 + i] = gen
+				
+				
 
 		    if(biome > 0.25 && !superflat){
 			
@@ -3612,6 +3638,13 @@ genChunk(chunk) {
 			chunk.setBlock(i, gen - 1, k, blockIds.sand);
 			chunk.setBlock(i, gen - 2, k, blockIds.sand);
 			chunk.setBlock(i, gen - 3, k, blockIds.sand);
+			        		if(gen<60 && !superflat) {
+				    gen = 59;
+				    chunk.setBlock(i, gen, k, blockIds.blueWool);
+				    chunk.setBlock(i, gen - 1, k, blockIds.blueWool);
+				    chunk.setBlock(i, gen - 2, k, blockIds.gravel);
+				    chunk.setBlock(i, gen - 3, k, blockIds.gravel);
+				}
 			if(gen>120){
 			    chunk.setBlock(i, gen, k, blockIds.stone);
 			}
@@ -3620,7 +3653,7 @@ genChunk(chunk) {
 			}
 		}
 
-			if(biome < 0.25){
+			if(biome < 0.5){
 			chunk.tops[k * 16 + i] = gen;
 
 
@@ -3628,8 +3661,15 @@ genChunk(chunk) {
 			chunk.setBlock(i, gen - 1, k, blockIds.dirt);
 			chunk.setBlock(i, gen - 2, k, blockIds.dirt);
 			chunk.setBlock(i, gen - 3, k, blockIds.dirt);
-
+        		if(gen<60 && !superflat) {
+				    gen = 59;
+				    chunk.setBlock(i, gen, k, blockIds.blueWool);
+				    chunk.setBlock(i, gen - 1, k, blockIds.blueWool);
+				    chunk.setBlock(i, gen - 2, k, blockIds.gravel);
+				    chunk.setBlock(i, gen - 3, k, blockIds.gravel);
+				}
 		    }
+		    
 
 				for (let j = 1; j < gen - 3; j++) {
 					chunk.setBlock(i, j, k, blockIds.stone)
@@ -4404,7 +4444,7 @@ genChunk(chunk) {
 		let mid = width / 2
 		Button.add(mid - 3 * x4, height - 30, w4, 40, "Edit", "loadsave menu", r => changeScene("editworld"), () => (selected() || !worlds[selectedWorld].edited))
 		Button.add(mid - x4, height - 30, w4, 40, "Delete", "loadsave menu", r => {
-			if (worlds[selectedWorld] && confirm(`Are you sure you want to delete ${worlds[selectedWorld].name}?`)) {
+			if (worlds[selectedWorld] && confirm(`Are you sure you want to deleat this world? ${worlds[selectedWorld].name} will be lost forever! (A long time!)`)) {
 				deleteFromDB(selectedWorld)
 				window.worlds.removeChild(document.getElementById(selectedWorld))
 				delete worlds[selectedWorld]
@@ -4479,7 +4519,7 @@ genChunk(chunk) {
 		// Comingsoon menu buttons
 		Button.add(width / 2, 395, width / 3, 40, "Back", "comingsoon menu", r => changeScene(previousScreen))
 		
-		Button.add(width / 2 - 220, 195, width / 3, 50, "Respawn", function() {
+		Button.add(width / 2 - 220, 195, width / 3, 50, "Respawn",  r => {
 			screen = "play";
 			p.health = 17;
 		    p.x = 8;
