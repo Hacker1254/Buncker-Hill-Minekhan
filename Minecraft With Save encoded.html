@@ -88,6 +88,12 @@
 			text-align: center;
 			color: white;
 		}
+		.center {
+        margin: auto;
+        width: 60%;
+        border: 3px solid #73AD21;
+        padding: 10px;
+        }
 	</style>
 	<body>
 	<canvas id="overlay" tabindex="0" width="600" height="600" style="position: absolute; top: 0px; left: 0px"></canvas>
@@ -369,6 +375,7 @@ function MineKhan() {
 		granite: "0g0ga0l56fi70plgu0v0yhw0sf1424tmn17eb8cf1aqna4f1e3al8f1e3x7un1jnje2n1qczoxr7434244344046445431548244224422341444335249241464143446145532344234232113754334244255342143347242445524442555322424474302155243346344255522344245535242552464245557314243844212555415442024425030323244424324439435524312355344448553215435547245544733324244425",
 		polishedAndesite: "0g0g90oilzi70sz23gf0v7a3270yjgjcv10ru60v11vyakf11w3ugv19okmwv1e4v30f7878888888788785843334442443134084444443376644307416763343446440844442456433334083344333424433318444634666554320833433332123444184562444466776608434433443344540844667633366444081444444664466208466654333134760844433334465334083333664444334406100000000110000",
 		polishedDiorite: "0g0g80qqu0ov0xfi5tr11vy6m71asubcv1f94t1b1jpkttr1o60w731ri7bpb7776677777666774764556657643564166764466577434506565333565454441675334576435457176544567733456607566767655346450744765756564534063556655467534516566544565544761664334655465666075673555775644517557654375466340745654576435744072445566545654512101110001100110",
+		    waterBlock: "0g0g70b5rqnk0b62z740ddzq9c0deaysw0dem7cg0fmiyeo0fmu6y83100001333211366000133100000000033310100013352133000000000000101000000000000013100000131000000001001000012113452100012310000013321112111111343331100000000011323000000000000011000000000000000001200001100000000110000001111110100000000121362000000121346633311",
 		polishedGranite: "0g0g90l56fi70plgu0v0yhw0sf1424tmn17eb8cf1aqna4f1e3al8f1e3x7un1jnje2n8888786866866565843344345444334374744554442446418444243334553342844444453344443262343344443734428345543644444431844444423445544263422344554433636444433443344442734444444464334284473344244442318455444445543341633443264434455264443444334447412111001110111100",
 	}
 
@@ -510,6 +517,11 @@ function MineKhan() {
 		{ name: "polishedDiorite" },
 		{ name: "granite" },
 		{ name: "polishedGranite" },
+		{ name: "waterBlock",
+      id: 0,
+      transparent: true,
+	  shadow: true,
+    },
 		// { // I swear, if y'all don't stop asking about TNT every 5 minutes!
 		// 	 name: "tnt",
 		// 	 textures: ["tntBottom", "tntTop", "tntSides"]
@@ -1063,17 +1075,18 @@ function MineKhan() {
 
 
 	// Callback functions for all the screens; will define them further down the page
-	let drawScreens = {
-		"main menu": () => {},
-		"options": () => {},
-		"play": () => {},
-		"pause": () => {},
-		"creation menu": () => {},
-		"inventory": () => {},
-		"multiplayer menu": () => {},
-		"comingsoon menu": () => {},
-		"loadsave menu": () => {},
-	}
+let drawScreens = {
+	"main menu": () => {},
+	"options": () => {},
+	"play": () => {},
+	"pause": () => {},
+	"creation menu": () => {},
+	"inventory": () => {},
+	"multiplayer menu": () => {},
+	"comingsoon menu": () => {},
+	"loadsave menu": () => {},
+	"dead": () => {}
+}
 	let html = {
 		pause: {
 			enter: [window.message],
@@ -2633,8 +2646,9 @@ function MineKhan() {
 				p.velocity.y = -p.maxYVelocity;
 			}
 		}
-		if(p.health <= -100) {
-		    screen = 'dead'
+		if(p.health <= 0) {
+		 changeScene("dead");
+
 		}
 	};
 
@@ -3309,7 +3323,7 @@ populate() {
 					ground = this.tops[k * 16 + i]
 					gen = superflat ? 4 : Math.round(noise((trueX + i) * smoothness, (trueZ + k) * smoothness) * hilliness) + generator.extra
 					biome = superflat ? 0 : Math.round(noise((trueX + i) * biomeSmooth, (trueZ + k) * biomeSmooth));
-if (trees && random() < 0.005 && this.getBlock(i, ground, k) && biome < 0.5) {
+if (trees && random() < 0.005 && this.getBlock(i, ground, k) === blockIds.grass) {
 
 
 						top = ground + Math.floor(4.5 + random(2.5))
@@ -3401,59 +3415,86 @@ if (trees && random() < 0.005 && this.getBlock(i, ground, k) && biome < 0.5) {
 					// Redstone: 29.1
 					// Diamond: 3.7
 					// Lapis: 4.1
-					ground -= 4
+				ground -= 4;
 
-					if (random() < 3.7 / 256) {
-						let y = random() * 16 | 0 + 1
-						y = y < ground ? y : ground
-						if (this.getBlock(i, y, k)) {
-							this.setBlock(i, y < ground ? y : ground, k, blockIds.diamondOre)
-						}
-					}
-
-					if (random() < 111.5 / 256) {
-						let y = random() * 64 | 0 + 1
-						y = y < ground ? y : ground
-						if (this.getBlock(i, y, k)) {
-							this.setBlock(i, y < ground ? y : ground, k, blockIds.ironOre)
-						}
-					}
-
-					if (random() < 185.5 / 256) {
-						let y = random() * ground | 0 + 1
-						y = y < ground ? y : ground
-						if (this.getBlock(i, y, k)) {
-							this.setBlock(i, y < ground ? y : ground, k, blockIds.coalOre)
-						}
-					}
-
-					if (random() < 10.4 / 256) {
-						let y = random() * 32 | 0 + 1
-						y = y < ground ? y : ground
-						if (this.getBlock(i, y, k)) {
-							this.setBlock(i, y < ground ? y : ground, k, blockIds.goldOre)
-						}
-					}
-
-					if (random() < 29.1 / 256) {
-						let y = random() * 16 | 0 + 1
-						y = y < ground ? y : ground
-						if (this.getBlock(i, y, k)) {
-							this.setBlock(i, y < ground ? y : ground, k, blockIds.redstoneOre)
-						}
-					}
-
-					if (random() < 4.1 / 256) {
-						let y = random() * 32 | 0 + 1
-						y = y < ground ? y : ground
-						if (this.getBlock(i, y, k)) {
-							this.setBlock(i, y < ground ? y : ground, k, blockIds.lapisOre)
-						}
+				if (random() < 3.7 / 256) {
+					let y = random() * 16 | 0 + 1;
+					y = y < ground ? y : ground;
+					if (this.getBlock(i, y, k)) {
+						this.setBlock(i, y < ground ? y : ground, k, blockIds.diamondOre);
 					}
 				}
-			}
 
-			this.populated = true
+				if (random() < 111.5 / 256) {
+					let y = random() * 64 | 0 + 1;
+					y = y < ground ? y : ground;
+					if (this.getBlock(i, y, k)) {
+						this.setBlock(i, y < ground ? y : ground, k, blockIds.ironOre);
+					}
+				}
+
+				if (random() < 185.5 / 256) {
+					let y = random() * ground | 0 + 1;
+					y = y < ground ? y : ground;
+					if (this.getBlock(i, y, k)) {
+						this.setBlock(i, y < ground ? y : ground, k, blockIds.coalOre);
+					}
+				}
+
+				if (random() < 10.4 / 256) {
+					let y = random() * 32 | 0 + 1;
+					y = y < ground ? y : ground;
+					if (this.getBlock(i, y, k)) {
+						this.setBlock(i, y < ground ? y : ground, k, blockIds.goldOre);
+					}
+				}
+
+				if (random() < 29.1 / 256) {
+					let y = random() * 16 | 0 + 1;
+					y = y < ground ? y : ground;
+					if (this.getBlock(i, y, k)) {
+						this.setBlock(i, y < ground ? y : ground, k, blockIds.redstoneOre);
+					}
+				}
+
+				if (random() < 4.1 / 256) {
+					let y = random() * 32 | 0 + 1;
+					y = y < ground ? y : ground;
+					if (this.getBlock(i, y, k)) {
+						this.setBlock(i, y < ground ? y : ground, k, blockIds.lapisOre);
+					}
+				}
+				
+				if(random() < 0.2/256) {
+				    let y = 40;
+				    let cobvsmoss = random() < 0.2 ? blockIds.cobblestone : blockIds.mossyCobble;
+					for(let xxx = 3;xxx<10;xxx++) {
+					    for(let zzz = 3;zzz<10;zzz++) {
+						        this.setBlock(xxx, y+3, zzz, cobvsmoss); 
+						this.setBlock(xxx, y-3, zzz, cobvsmoss);          
+						for(let hhh = y-3;hhh<y+3;hhh++) {
+						    this.setBlock(xxx,hhh, 3, cobvsmoss);
+						    this.setBlock(xxx,hhh, 9, cobvsmoss);
+						    this.setBlock(3, hhh,zzz, cobvsmoss);
+						    this.setBlock(9, hhh,zzz, cobvsmoss);
+						    
+						}
+						
+					    }
+					}
+					for(let xxx = 4;xxx<9;xxx++) {
+					    for(let zzz = 4;zzz<9;zzz++){
+					        for(let yyy = y-2;yyy<y+3;yyy++){
+					            this.setBlock(xxx,yyy,zzz, blockIds.air, true)
+					        }
+					    }
+					}
+					this.setBlock(6, y-2, 6, blockIds.coalBlock);
+				}
+			}
+		}
+
+		this.populated = true;
 		}
 		genMesh() {
 			let start = win.performance.now()
@@ -4519,14 +4560,14 @@ genChunk(chunk) {
 		// Comingsoon menu buttons
 		Button.add(width / 2, 395, width / 3, 40, "Back", "comingsoon menu", r => changeScene(previousScreen))
 		
-		Button.add(width / 2 - 220, 195, width / 3, 50, "Respawn",  r => {
-			screen = "play";
+		Button.add(width / 2 - 220, 195, width / 3, 50, "Respawn", "dead",  r => {
+			changeScene("play");
 			p.health = 17;
 		    p.x = 8;
 		    p.z = 8;
 		    play();
 		    p.y = superflat ? 6 : (Math.round(noise(8 * generator.smooth, 8 * generator.smooth) * generator.height) + 2 + generator.extra);
-		}, "dead");
+		});
 		
 		let settingsState = true;
 		let mouseSense = 100;
